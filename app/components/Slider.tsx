@@ -14,6 +14,8 @@ interface SliderProps {
   containerClassName?: string;
   contentContainerClassName?: string;
   withArrows?: boolean;
+  scrollEnabled?: boolean;
+  itemClassName?: string;
 }
 
 export interface SliderMethods {
@@ -30,6 +32,8 @@ const Slider = forwardRef<SliderMethods, SliderProps>(
       containerClassName = "",
       contentContainerClassName = "",
       withArrows = true,
+      scrollEnabled = true,
+      itemClassName,
     },
     ref
   ) => {
@@ -192,16 +196,17 @@ const Slider = forwardRef<SliderMethods, SliderProps>(
           className={`flex ${
             orientation === "vertical"
               ? "flex-col overflow-y-auto h-full"
-              : "overflow-x-auto whitespace-nowrap flex-nowrap w-full"
-          } no-scrollbar`}
+              : "overflow-x-auto whitespace-nowrap flex-nowrap w-full h-full"
+          } no-scrollbar ${!scrollEnabled && "overflow-x-hidden"}`}
         >
           <div
-            className={`flex ${
+            className={`flex h-full ${
               orientation === "vertical" ? "flex-col" : "flex-row"
             } ${contentContainerClassName}`}
           >
             {React.Children.map(children, (child, index) => (
               <div
+                className={itemClassName}
                 ref={(el) => {
                   if (el) itemsRef.current[index] = el;
                 }}
