@@ -11,7 +11,6 @@ const Chip: React.FC<ChipProps> = ({
   containerClassName,
   onSelect,
 }) => {
-  console.log(selected);
   return (
     <button
       onClick={() => onSelect?.(category)}

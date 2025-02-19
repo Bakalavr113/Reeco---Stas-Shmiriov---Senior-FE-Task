@@ -69,7 +69,6 @@ const Slider = forwardRef<SliderMethods, SliderProps>(
 
     const scrollToItem = (index: number) => {
       if (!itemsRef.current[index] || !sliderRef.current) return;
-
       const item = itemsRef.current[index];
       const container = sliderRef.current;
 
@@ -87,25 +86,61 @@ const Slider = forwardRef<SliderMethods, SliderProps>(
     };
 
     const handleNext = () => {
-      if (!sliderRef.current) return;
+      if (!sliderRef.current || itemsRef.current.length === 0) return;
 
-      const containerSize =
-        orientation === "horizontal"
-          ? sliderRef.current.clientWidth
-          : sliderRef.current.clientHeight;
+      const container = sliderRef.current;
+      const containerWidth = container.clientWidth;
+      const scrollLeft = container.scrollLeft;
+      let lastVisibleIndex = -1;
 
-      scrollToOffset(containerSize + 32);
+      for (let i = 0; i < itemsRef.current.length; i++) {
+        const item = itemsRef.current[i];
+        if (!item) continue;
+
+        const itemLeft = item.offsetLeft - container.offsetLeft;
+        const itemRight = itemLeft + item.clientWidth;
+
+        if (itemRight <= scrollLeft + containerWidth) {
+          lastVisibleIndex = i;
+        } else {
+          break;
+        }
+      }
+      const nextIndex = lastVisibleIndex + 1;
+      if (nextIndex >= itemsRef.current.length) return;
+      const nextItem = itemsRef.current[nextIndex];
+      container.scrollTo({
+        left: nextItem.offsetLeft + nextItem.clientWidth - containerWidth,
+        behavior: "smooth",
+      });
     };
 
     const handlePrev = () => {
-      if (!sliderRef.current) return;
+      if (!sliderRef.current || itemsRef.current.length === 0) return;
 
-      const containerSize =
-        orientation === "horizontal"
-          ? sliderRef.current.clientWidth
-          : sliderRef.current.clientHeight;
+      const container = sliderRef.current;
+      const containerWidth = container.clientWidth;
+      const scrollLeft = container.scrollLeft;
 
-      scrollToOffset(-containerSize - 32);
+      let firstVisibleIndex = -1;
+
+      for (let i = 0; i < itemsRef.current.length; i++) {
+        const item = itemsRef.current[i];
+        if (!item) continue;
+
+        const itemLeft = item.offsetLeft - container.offsetLeft;
+        const itemRight = itemLeft + item.clientWidth;
+
+        if (itemLeft <= scrollLeft + containerWidth && itemRight > scrollLeft) {
+          firstVisibleIndex = i;
+          break;
+        }
+      }
+
+      const prevIndex = firstVisibleIndex - 1;
+      if (prevIndex < 0) scrollToItem(0);
+
+      scrollToItem(prevIndex);
     };
 
     const updateButtonVisibility = () => {
